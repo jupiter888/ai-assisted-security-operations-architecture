@@ -1,0 +1,13 @@
+# macOS metadata
+.DS_Store
+.AppleDouble
+._*
+
+# Editor temporary files
+*.swp
+*.swo
+*~
+
+# Local editor configuration
+.vscode/
+.idea/

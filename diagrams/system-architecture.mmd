@@ -1,0 +1,74 @@
+
+flowchart TD
+    subgraph DATA["Synthetic Event Environment"]
+        A["12 Synthetic Security Events"]
+        GT["Ground Truth<br/>Evaluation Only"]
+    end
+
+    subgraph DETECT["Event Validation and Detection"]
+        B["Event Schema Validator"]
+        C["Deterministic Detection Engine<br/>Rules P7-R01 to P7-R05"]
+    end
+
+    subgraph AI["AI-Assisted Triage"]
+        D["Prompt Construction<br/>Untrusted Event Content"]
+        E["Local Ollama<br/>qwen2.5:3b"]
+        F["Structured Finding Validator"]
+    end
+
+    subgraph SCREEN["Three Security Screening Controls"]
+        S1["Input Instruction Screening"]
+        S2["Output Classification-Claim Screening"]
+        S3["Evidence-Attribution Screening"]
+        DEC{"Any Screening Flag?"}
+    end
+
+    subgraph REVIEW["Human Review Boundary"]
+        R1["Security Review Required"]
+        R2["Pending Human Review"]
+        H["Human Analyst<br/>Decision Support"]
+    end
+
+    subgraph APPROVAL["Separate Simulated Authorization Boundary"]
+        RS["Simulated Reviewer Session"]
+        AR["Approval Registry<br/>Finding / Action Binding"]
+        AG["Authorization Gate<br/>Single-Use Approval"]
+        STOP["No Operational Response Execution"]
+    end
+
+    A -->|"TB-01"| B
+    B --> C
+    C --> D
+    B --> S1
+    D -->|"TB-02"| E
+    E -->|"TB-03"| F
+
+    F -->|"TB-04"| S2
+    F --> S3
+
+    S1 --> DEC
+    S2 --> DEC
+    S3 --> DEC
+
+    DEC -->|"Yes"| R1
+    DEC -->|"No"| R2
+
+    R1 -->|"TB-05"| H
+    R2 -->|"TB-05"| H
+
+    H -.->|"Separate simulated approval workflow"| RS
+    RS -->|"TB-06"| AR
+    AR -->|"TB-07"| AG
+    AG --> STOP
+
+    GT -.->|"Evaluation comparison only"| C
+
+    classDef untrusted fill:#34231f,stroke:#cc7459,color:#ffffff
+    classDef security fill:#182e38,stroke:#66a8c0,color:#ffffff
+    classDef review fill:#35301d,stroke:#d4b45e,color:#ffffff
+    classDef boundary fill:#282638,stroke:#a49ad0,color:#ffffff
+
+    class A,D,E untrusted
+    class B,C,F,S1,S2,S3,DEC security
+    class R1,R2,H review
+    class RS,AR,AG,STOP boundary

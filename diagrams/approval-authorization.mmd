@@ -1,0 +1,71 @@
+
+flowchart TD
+    subgraph REQUEST["Untrusted Request Boundary"]
+        AI["AI-Assisted Triage Finding"]
+        REQ["Simulated Response Request<br/>Finding ID + Action"]
+        FORGE["Fabricated Approval Dictionary<br/>P7-F02 Original Attack"]
+    end
+
+    subgraph IDENTITY["Simulated Reviewer Identity Boundary"]
+        CALLER["Caller Claiming Reviewer Identity"]
+        SESSION["Reviewer Session Authority"]
+        VALID{"Valid Session Token<br/>and Matching Identity?"}
+        RISK["Residual P7-F03 Risk<br/>Session Establishment Is Not Authenticated"]
+    end
+
+    subgraph ISSUANCE["Approval Issuance Boundary"]
+        REG["In-Memory Approval Registry"]
+        TOKEN["Approval Token<br/>Finding + Action + Expiration"]
+        REJECT1["Reject Approval Issuance"]
+    end
+
+    subgraph AUTH["Simulated Authorization Boundary"]
+        GATE["Approval Gate"]
+        CHECK{"Valid Matching<br/>Unused Approval?"}
+        REJECT2["Authorization Denied"]
+        ALLOW["Simulated Authorization Granted"]
+        STOP["No Response Action Executed"]
+    end
+
+    subgraph LIMITS["Unresolved Production Security Requirements"]
+        AUTHN["Independent Human Authentication"]
+        PROTECT["Protected Approval Issuance"]
+        AUDIT["Durable Tamper-Resistant Audit"]
+        REVOKE["Approval Revocation Policy"]
+    end
+
+    AI --> REQ
+    FORGE -->|"Rejected: P7-F02 Mitigation"| GATE
+
+    CALLER --> SESSION
+    SESSION --> VALID
+    VALID -->|"No"| REJECT1
+    VALID -->|"Yes"| REG
+
+    RISK -.->|"Unresolved upstream identity risk"| SESSION
+
+    REG --> TOKEN
+    TOKEN --> GATE
+    REQ --> GATE
+
+    GATE --> CHECK
+    CHECK -->|"No"| REJECT2
+    CHECK -->|"Yes"| ALLOW
+    ALLOW --> STOP
+
+    SESSION -.->|"Session revocation does not invalidate issued approvals"| TOKEN
+
+    AUTHN -.-> SESSION
+    PROTECT -.-> REG
+    AUDIT -.-> REG
+    REVOKE -.-> TOKEN
+
+    classDef attack fill:#382321,stroke:#d47c72,color:#ffffff
+    classDef implemented fill:#1d3435,stroke:#72b9b0,color:#ffffff
+    classDef decision fill:#35301f,stroke:#d4b45e,color:#ffffff
+    classDef residual fill:#302b40,stroke:#a89bd4,color:#ffffff
+
+    class AI,REQ,FORGE,CALLER attack
+    class SESSION,REG,TOKEN,GATE implemented
+    class VALID,CHECK,REJECT1,REJECT2,ALLOW,STOP decision
+    class RISK,AUTHN,PROTECT,AUDIT,REVOKE residual
